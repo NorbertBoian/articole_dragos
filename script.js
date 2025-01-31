@@ -28,6 +28,7 @@ const getData = async () => {
     controller = new AbortController();
     const { signal } = controller;
     urls = [];
+    downloadButton.disabled = true;
     totalDiv.textContent = `Total: ${urls.length}`;
     logDiv.textContent = '';
 
@@ -80,6 +81,7 @@ const getData = async () => {
     );
     urls = filteredPosts.map((post) => post.link).reverse();
     totalDiv.textContent = `Total: ${urls.length}`;
+    downloadButton.disabled = false;
   } catch (err) {}
 };
 
