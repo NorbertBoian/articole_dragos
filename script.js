@@ -45,6 +45,7 @@ const getData = async () => {
     const after = new Date(date);
     const before = new Date(date);
 
+    after.setUTCHours(23, 59, 59, 999);
     after.setDate(after.getDate() - 1);
     before.setMonth(+month);
 
