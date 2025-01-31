@@ -18,60 +18,68 @@ let urls = [];
 let year = currentYear;
 let month = currentMonth;
 
+let controller = new AbortController();
+
 const getData = async () => {
-  urls = [];
-  totalDiv.textContent = `Total: ${urls.length}`;
-  logDiv.textContent = '';
+  try {
+    if (controller) {
+      controller.abort();
+    }
+    controller = new AbortController();
+    const { signal } = controller;
+    urls = [];
+    totalDiv.textContent = `Total: ${urls.length}`;
+    logDiv.textContent = '';
 
-  year = yearInput.value === '' ? currentYear : yearInput.value;
-  month = monthInput.value === '' ? currentMonth : monthInput.value;
+    year = yearInput.value === '' ? currentYear : yearInput.value;
+    month = monthInput.value === '' ? currentMonth : monthInput.value;
 
-  const baseUrl = 'https://romanialibera.ro/wp-json/wp/v2/posts';
-  const authorId = 3250;
-  const perPage = '100';
-  let offset = '0';
+    const baseUrl = 'https://romanialibera.ro/wp-json/wp/v2/posts';
+    const authorId = 3250;
+    const perPage = '100';
+    let offset = '0';
 
-  const url = new URL(baseUrl);
-  const date = new Date(Date.UTC(+year, +month - 1));
+    const url = new URL(baseUrl);
+    const date = new Date(Date.UTC(+year, +month - 1));
 
-  const after = new Date(date);
-  const before = new Date(date);
+    const after = new Date(date);
+    const before = new Date(date);
 
-  after.setDate(after.getDate() - 1);
-  before.setMonth(+month);
+    after.setDate(after.getDate() - 1);
+    before.setMonth(+month);
 
-  const afterString = after.toISOString().slice(0, -1);
-  const beforeString = before.toISOString().slice(0, -1);
+    const afterString = after.toISOString().slice(0, -1);
+    const beforeString = before.toISOString().slice(0, -1);
 
-  url.searchParams.append('per_page', perPage);
-  url.searchParams.append('offset', offset);
-  url.searchParams.append('before', beforeString);
-  url.searchParams.append('after', afterString);
+    url.searchParams.append('per_page', perPage);
+    url.searchParams.append('offset', offset);
+    url.searchParams.append('before', beforeString);
+    url.searchParams.append('after', afterString);
 
-  let lastPage = false;
+    let lastPage = false;
 
-  const unfilteredPosts = [];
+    const unfilteredPosts = [];
 
-  while (!lastPage) {
-    const response = await fetch(url);
-    const data = await response.json();
+    while (!lastPage) {
+      const response = await fetch(url, { signal });
+      const data = await response.json();
 
-    const div = document.createElement('div');
-    div.textContent = `offset: ${offset}, items: ${data.length}`;
-    logDiv.appendChild(div);
+      const div = document.createElement('div');
+      div.textContent = `offset: ${offset}, items: ${data.length}`;
+      logDiv.appendChild(div);
 
-    unfilteredPosts.push(...data);
-    offset = `${+offset + +perPage}`;
-    url.searchParams.set('offset', offset);
-    if (!data.length) lastPage = true;
-  }
+      unfilteredPosts.push(...data);
+      offset = `${+offset + +perPage}`;
+      url.searchParams.set('offset', offset);
+      if (!data.length) lastPage = true;
+    }
 
-  const filteredPosts = unfilteredPosts.filter(
-    (post) => post.author === authorId
-  );
-  urls = filteredPosts.map((post) => post.link).reverse();
-
-  totalDiv.textContent = `Total: ${urls.length}`;
+    const filteredPosts = unfilteredPosts.filter(
+      (post) => post.author === authorId
+    );
+    urls = filteredPosts.map((post) => post.link).reverse();
+    totalDiv.textContent = `Total: ${urls.length}`;
+  } catch (err) {}
 };
 
 function download() {
