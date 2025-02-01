@@ -53,10 +53,10 @@ const getData = async () => {
     const afterString = after.toISOString().slice(0, -1);
     const beforeString = before.toISOString().slice(0, -1);
 
-    url.searchParams.append('per_page', perPage);
-    url.searchParams.append('offset', offset);
-    url.searchParams.append('before', beforeString);
-    url.searchParams.append('after', afterString);
+    url.searchParams.set('per_page', perPage);
+    url.searchParams.set('offset', offset);
+    url.searchParams.set('before', beforeString);
+    url.searchParams.set('after', afterString);
 
     let lastPage = false;
 
